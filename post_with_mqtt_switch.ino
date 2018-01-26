@@ -4,13 +4,13 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
-#define WIFI_SSID "OnePlus3"
-#define WIFI_PASS "8550912599"
+#define WIFI_SSID "your wifi ssid"
+#define WIFI_PASS "your ssid passwd"
 
 #define MQTT_SERV "io.adafruit.com"
 #define MQTT_PORT 1883
-#define MQTT_NAME "abdeokar23"
-#define MQTT_PASS "2ea31ca6e6744c5fa7bceb72166f1367"
+#define MQTT_NAME "your adafruit user id"
+#define MQTT_PASS "your adafruit AIO key"
 
 #define LED_BUILTIN 16
 long randNum;
@@ -56,9 +56,6 @@ void loop()
   
 		if (subscription == &swit)
 		{
-			//Print the new value to the serial monitor
-			/*Serial.print("value: ");
-			Serial.println((char*) swit.lastread);*/
 			do
 			{
 				randNum = random(20,30);
@@ -68,7 +65,7 @@ void loop()
 				StaticJsonBuffer<300> JSONbuffer;   //Declaring static JSON buffer
 				JsonObject& JSONencoder = JSONbuffer.createObject(); 
 					 
-				JSONencoder["sender"] = "d4ee26eee15148ee92c6cd394edd974e";
+				JSONencoder["sender"] = "some-address";
 				JSONencoder["recipient"] = "some-other-address";
 				JSONencoder["data"] = randNum;    
 				   
@@ -78,7 +75,7 @@ void loop()
 					  
 				HTTPClient http;    //Declare object of class HTTPClient
 					  
-				http.begin("http://192.168.43.3:5000/upload/new");      //Specify request destination
+				http.begin("<the URI you want to post your data to>");      //Specify request destination
 				http.addHeader("Content-Type", "application/json");  //Specify content-type header
 					   
 				int httpCode = http.POST(JSONmessageBuffer);   //Send the request
@@ -116,10 +113,11 @@ bool reader()
 		{
 			if(strcmp((char *)swit.lastread,"ON")==0)
 				send_state = true;
-			else{
-      send_state = false;
-      Serial.println("MQTT Switch off");
-      digitalWrite(LED_BUILTIN,HIGH);
+			else
+			{
+				send_state = false;
+				Serial.println("MQTT Switch off");
+				digitalWrite(LED_BUILTIN,HIGH);
 			}
 				
 		}
