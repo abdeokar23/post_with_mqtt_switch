@@ -85,8 +85,6 @@ void loop()
 				Serial.println(httpCode);   //Print HTTP return code
 				Serial.println(payload);    //Print request response payload
 
-				if(strcmp((char *)swit.lastread,"OFF")==0)
-				Serial.println("stop received");
 				delay(5000);
 				http.end();  //Close connection
 					  
