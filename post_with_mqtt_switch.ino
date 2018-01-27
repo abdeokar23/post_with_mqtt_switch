@@ -1,8 +1,13 @@
 #include <ESP8266WiFi.h>
-#include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
+
+#include <ArduinoJson.h>
+
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
+
+#include <NTPClient.h>    //timestamp function
+#include <WiFiUdp.h>
 
 #define WIFI_SSID "your wifi ssid"
 #define WIFI_PASS "your ssid passwd"
@@ -11,6 +16,13 @@
 #define MQTT_PORT 1883
 #define MQTT_NAME "your adafruit user id"
 #define MQTT_PASS "your adafruit AIO key"
+
+#define NTP_OFFSET   11 * 30 * 60      // In seconds (GMT + 5:30)
+#define NTP_INTERVAL 60 * 1000    // In miliseconds
+#define NTP_ADDRESS  "in.pool.ntp.org"
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
 
 #define LED_BUILTIN 16
 long randNum;
@@ -24,6 +36,7 @@ Adafruit_MQTT_Subscribe swit = Adafruit_MQTT_Subscribe(&mqtt, MQTT_NAME "/feeds/
 
 void setup()
 {
+	timeClient.begin();
 	Serial.begin(9600);
 	randomSeed(analogRead(0));
 
@@ -58,6 +71,8 @@ void loop()
 		{
 			do
 			{
+				timeClient.update();
+        		String formattedTime = timeClient.getFormattedTime();
 				randNum = random(20,30);
 				Serial.println("MQTT Switch on");
 				//Serial.println((char*)swit.lastread);
@@ -67,7 +82,8 @@ void loop()
 					 
 				JSONencoder["sender"] = "some-address";
 				JSONencoder["recipient"] = "some-other-address";
-				JSONencoder["data"] = randNum;    
+				JSONencoder["data"] = randNum;
+				JSONencoder["stamp"] = formattedTime;
 				   
 				char JSONmessageBuffer[300];
 				JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
@@ -94,9 +110,7 @@ void loop()
 
 	// ping the server to keep the mqtt connection alive
 	if (!mqtt.ping())
-	{
-	mqtt.disconnect();
-	}
+		mqtt.disconnect();
 }
 
 bool reader()
@@ -117,7 +131,6 @@ bool reader()
 				Serial.println("MQTT Switch off");
 				digitalWrite(LED_BUILTIN,HIGH);
 			}
-				
 		}
 	}
 	return send_state;
