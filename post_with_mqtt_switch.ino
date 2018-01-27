@@ -6,7 +6,7 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
-#include <NTPClient.h>    //timestamp function
+#include <NTPClient.h>    							//used for providing a timestamp
 #include <WiFiUdp.h>
 
 #define WIFI_SSID "your wifi ssid"
@@ -17,8 +17,8 @@
 #define MQTT_NAME "your adafruit user id"
 #define MQTT_PASS "your adafruit AIO key"
 
-#define NTP_OFFSET   11 * 30 * 60      // In seconds (GMT + 5:30)
-#define NTP_INTERVAL 60 * 1000    // In miliseconds
+#define NTP_OFFSET   11 * 30 * 60      				// In seconds (GMT + 5:30)
+#define NTP_INTERVAL 60 * 1000    					// In miliseconds
 #define NTP_ADDRESS  "in.pool.ntp.org"
 
 WiFiUDP ntpUDP;
@@ -49,7 +49,7 @@ void setup()
 	}
 	Serial.println("OK!");
 
-	//Subscribe to the onoff feed
+	//Subscribe to the edgeswitch feed
 	mqtt.subscribe(&swit);
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, HIGH);
@@ -75,9 +75,8 @@ void loop()
 				String formattedTime = timeClient.getFormattedTime();
 				randNum = random(20,30);
 				Serial.println("MQTT Switch on");
-				//Serial.println((char*)swit.lastread);
 				digitalWrite(LED_BUILTIN,LOW);
-				StaticJsonBuffer<300> JSONbuffer;   //Declaring static JSON buffer
+				StaticJsonBuffer<300> JSONbuffer;   						//Declaring static JSON buffer
 				JsonObject& JSONencoder = JSONbuffer.createObject(); 
 					 
 				JSONencoder["sender"] = "some-address";
@@ -89,20 +88,20 @@ void loop()
 				JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
 				Serial.println(JSONmessageBuffer);
 					  
-				HTTPClient http;    //Declare object of class HTTPClient
+				HTTPClient http;  										    //Declare object of class HTTPClient
 					  
 				http.begin("<the URI you want to post your data to>");      //Specify request destination
-				http.addHeader("Content-Type", "application/json");  //Specify content-type header
+				http.addHeader("Content-Type", "application/json");  		//Specify content-type header
 					   
-				int httpCode = http.POST(JSONmessageBuffer);   //Send the request
+				int httpCode = http.POST(JSONmessageBuffer);   				//Send the request
 				http.writeToStream(&Serial);
-				String payload = http.getString();                                        //Get the response payload
+				String payload = http.getString();                          //Get the response payload
 					   
-				Serial.println(httpCode);   //Print HTTP return code
-				Serial.println(payload);    //Print request response payload
+				Serial.println(httpCode);  									//Print HTTP return code
+				Serial.println(payload); 								    //Print request response payload
 
 				delay(5000);
-				http.end();  //Close connection
+				http.end();  												//Close connection
 					  
 			}while(reader());
 		}
