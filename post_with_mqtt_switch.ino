@@ -72,7 +72,7 @@ void loop()
 			do
 			{
 				timeClient.update();
-        		String formattedTime = timeClient.getFormattedTime();
+				String formattedTime = timeClient.getFormattedTime();
 				randNum = random(20,30);
 				Serial.println("MQTT Switch on");
 				//Serial.println((char*)swit.lastread);
