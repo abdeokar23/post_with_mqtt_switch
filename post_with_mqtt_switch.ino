@@ -9,6 +9,8 @@
 #include <NTPClient.h>    							//used for providing a timestamp
 #include <WiFiUdp.h>
 
+#include "DHTesp.h"
+
 #define WIFI_SSID "your wifi ssid"
 #define WIFI_PASS "your ssid passwd"
 
@@ -21,11 +23,13 @@
 #define NTP_INTERVAL 60 * 1000    					// In miliseconds
 #define NTP_ADDRESS  "in.pool.ntp.org"
 
+DHTesp dht;
+
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
 
 #define LED_BUILTIN 16
-long randNum;
+//long randNum;	Test variable
 
 //Set up MQTT and WiFi clients
 WiFiClient client1;
@@ -38,7 +42,9 @@ void setup()
 {
 	timeClient.begin();
 	Serial.begin(9600);
-	randomSeed(analogRead(0));
+	//randomSeed(analogRead(0));
+
+	dht.setup(2); // data pin 2
 
 	//Connect to WiFi
 	Serial.print("\n\nConnecting to Wifi... ");
@@ -73,15 +79,18 @@ void loop()
 			{
 				timeClient.update();
 				String formattedTime = timeClient.getFormattedTime();
-				randNum = random(20,30);
-				Serial.println("MQTT Switch on");
-				digitalWrite(LED_BUILTIN,LOW);
+
+				delay(dht.getMinimumSamplingPeriod());
+				float temperature = dht.getTemperature();
+
+				//randNum = random(20,30);
+				
 				StaticJsonBuffer<300> JSONbuffer;   						//Declaring static JSON buffer
 				JsonObject& JSONencoder = JSONbuffer.createObject(); 
 					 
 				JSONencoder["sender"] = "some-address";
 				JSONencoder["recipient"] = "some-other-address";
-				JSONencoder["data"] = randNum;
+				JSONencoder["data"] = temperature;
 				JSONencoder["stamp"] = formattedTime;
 				   
 				char JSONmessageBuffer[300];
@@ -123,7 +132,11 @@ bool reader()
 		if (subscription == &swit)
 		{
 			if(strcmp((char *)swit.lastread,"ON")==0)
+			{
 				send_state = true;
+				Serial.println("MQTT Switch on");
+				digitalWrite(LED_BUILTIN,LOW);
+			}
 			else
 			{
 				send_state = false;
