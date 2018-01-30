@@ -29,7 +29,6 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
 
 #define LED_BUILTIN 16
-//long randNum;	Test variable
 
 //Set up MQTT and WiFi clients
 WiFiClient client1;
@@ -82,15 +81,15 @@ void loop()
 
 				delay(dht.getMinimumSamplingPeriod());
 				float temperature = dht.getTemperature();
+				char tempS[10];
+				dtostrf(temperature,2,2,tempS);
 
-				//randNum = random(20,30);
-				
 				StaticJsonBuffer<300> JSONbuffer;   						//Declaring static JSON buffer
 				JsonObject& JSONencoder = JSONbuffer.createObject(); 
 					 
 				JSONencoder["sender"] = "some-address";
 				JSONencoder["recipient"] = "some-other-address";
-				JSONencoder["data"] = temperature;
+				JSONencoder["data"] = tempS;
 				JSONencoder["stamp"] = formattedTime;
 				   
 				char JSONmessageBuffer[300];
