@@ -1,4 +1,4 @@
-# Posting data to a Blockchain
+# Posting data to a Blockchain using NodeMCU
 
 This code deals with POSTing sensor data to a blockchain. The sensor used in this example is a DHT11, and the data being POSTed to the blockchain is temperature. 
 
